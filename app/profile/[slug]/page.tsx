@@ -1,4 +1,4 @@
-const BlogPost = ({params: {slug}}) => {
+const Profile = ({params: {slug}}) => {
   return(
     <p className="text-2xl">
       Showing the blog post for the 
@@ -7,4 +7,4 @@ const BlogPost = ({params: {slug}}) => {
   )
 }
 
-export default BlogPost;
+export default Profile;
