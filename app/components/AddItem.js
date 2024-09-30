@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import db from '../lib/firebase/firestore';
+import db from '../../lib/firebase/firestore';
 import { collection, addDoc } from "firebase/firestore"; 
 
 const AddItem = () => {
