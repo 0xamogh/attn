@@ -1,12 +1,19 @@
-"use client"
+// app/dashboard/page.tsx
+'use client';
 
-import AddItem from '../components/AddItem';
+import { useAuth } from '../context/authContext';
 
-export default function Home() {
+export default function Dashboard() {
+  const { user, loading } = useAuth();
+  console.log("^_^ ~ file: page.tsx:8 ~ Dashboard ~ user:", user);
+
+
+  if (loading) return <p>Loading...</p>;
+
   return (
     <div>
-      <h1>WE manage requests here</h1>
-      <AddItem />
+      <h1>Welcome to the Dashboard</h1>
+      <p>User: {user?.uid}</p>
     </div>
   );
 }

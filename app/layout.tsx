@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import WagmiProviderWrapper from "./components/WagmiProviderWrapper";
+import { AuthProvider } from "./context/authContext";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <AuthProvider>
         <WagmiProviderWrapper>
       <div className="navbar bg-base-100">
       <div className="flex-1">
@@ -62,6 +64,7 @@ export default function RootLayout({
     </div>
         {children}
         </WagmiProviderWrapper>
+        </AuthProvider>
       </body>
     </html>
   );
