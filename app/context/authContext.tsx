@@ -22,9 +22,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
-    //   if (!user) {
-    //     router.push('/login'); // Redirect to login if user is not authenticated
-    //   }
+      // if (!user) {
+      //   router.push('/login'); // Redirect to login if user is not authenticated
+      // }
     });
 
     return () => unsubscribe();
