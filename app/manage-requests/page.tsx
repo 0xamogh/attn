@@ -1,20 +1,59 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PendingPage from '../components/PendingPage';
 import SentPage from '../components/SentPage';
 import ApprovedPage from '../components/ApprovedPage';
 import { useAuth } from '../context/authContext';
+import db from '@/lib/firebase/firestore';
+import { query, collection, where, getDocs } from '@firebase/firestore';
 
 type PageType = 'Pending' | 'Sent' | 'Approved';
 
 export default function Home() {
   const [activePage, setActivePage] = useState<PageType>('Pending');
+  const { user, loading } = useAuth();
+  console.log("^_^ ~ file: page.tsx:16 ~ Home ~ user:", user.uid);
 
+  const [requests, setRequests] = useState<any>([]);
+  console.log("^_^ ~ file: page.tsx:19 ~ Home ~ requests:", requests);
+
+  const [fetching, setFetching] = useState(true);
+
+  useEffect(() => {
+    if (!loading && user) {
+      const fetchRequests = async () => {
+        try {
+          // Query the requests collection where uid matches the current user
+          const q = query(
+            collection(db, "requests"),
+            where("uid", "==", user.uid)
+          );
+          const querySnapshot = await getDocs(q);
+
+          // Store the filtered requests in the state
+          const requestData = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) ;
+
+          setRequests(requestData);
+        } catch (error) {
+          console.error("Error fetching requests: ", error);
+        } finally {
+          setFetching(false);
+        }
+      };
+
+      fetchRequests();
+    }
+  }, [loading, user]);
   // Function to render the correct component based on the active page
   const renderPage = () => {
-      case 'Pending':
-        return <PendingPage />;
+       switch (activePage) {
+         case 'Pending':
+           return <PendingPage />;
+           case 'Sent':
         return <SentPage />;
       case 'Approved':
         return <ApprovedPage />;
@@ -23,9 +62,7 @@ export default function Home() {
     }
   };
 
-  const { user, loading } = useAuth();
-    switch (activePage) {
-      case 'Sent':
+
   return (
     <div>
       <h1>We manage requests here</h1>
