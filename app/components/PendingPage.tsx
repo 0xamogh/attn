@@ -1,80 +1,68 @@
 import React, { useEffect, useState } from 'react';
 import db from '../../lib/firebase/firestore';
-import { collection, doc, query, where, getDocs, updateDoc, getDoc } from "firebase/firestore"; // Firestore imports
+import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore"; // Firestore imports
 import { useAuth } from '../context/authContext';
 
 interface Request {
   id: string;
   fromId: string;
   message: string;
-  status: string;
-  timestamp: any;
-}
-
-interface UserProfile {
-  name: string;
-  photoUrl: string;
+  status: string; // Should include "pending", "accepted", "rejected"
+  timestamp: any; // You can refine this to Firestore's Timestamp type if needed
 }
 
 const PendingPage = (): JSX.Element => {
-  const { user, loading } = useAuth(); // Get current user and loading state
-  const [pendingRequests, setPendingRequests] = useState<Request[]>([]); // State for pending requests
-  const [fetching, setFetching] = useState(true); // State for data fetching
-  const [profiles, setProfiles] = useState<{ [key: string]: UserProfile }>({}); // State for storing profile details
+  const { user, loading } = useAuth(); // Get the current user and loading state
+  const [pendingRequests, setPendingRequests] = useState<Request[]>([]); // State to hold an array of pending requests
+  const [fetching, setFetching] = useState(true); // State to indicate if data is being fetched
 
   useEffect(() => {
     const fetchPendingRequests = async () => {
       if (!loading && user) {
         try {
-          const requestsRef = collection(db, "requests");
-          const q = query(requestsRef, where("toId", "==", user.uid), where("status", "==", "pending")); // Fetch only pending requests for current user
+          const requestsRef = collection(db, "requests"); // Reference to the requests collection
+          const q = query(requestsRef, where("toId", "==", user.uid), where("status", "==", "pending")); // Query for pending requests
           const querySnapshot = await getDocs(q);
 
-          const requests: Request[] = [];
-          const profilePromises: Promise<void>[] = [];
-
+          const requests: Request[] = []; // Array to store the pending requests
           querySnapshot.forEach((doc) => {
-            const requestData = doc.data() as Request;
-            requests.push({ id: doc.id, ...requestData });
-
-            // Fetch the profile data for each fromId
-            const profilePromise = getDoc(doc(db, "users", requestData.fromId)).then((userDoc) => {
-              if (userDoc.exists()) {
-                setProfiles((prev) => ({
-                  ...prev,
-                  [requestData.fromId]: userDoc.data() as UserProfile,
-                }));
-              }
-            });
-
-            profilePromises.push(profilePromise);
+            requests.push({ id: doc.id, ...doc.data() } as Request); // Push each pending request to the array
           });
 
-          setPendingRequests(requests);
-          await Promise.all(profilePromises); // Ensure all profiles are loaded
+          setPendingRequests(requests); // Set the fetched requests to state
         } catch (error) {
           console.error("Error fetching pending requests: ", error);
         } finally {
-          setFetching(false);
+          setFetching(false); // Stop fetching once data is retrieved
         }
       }
     };
 
     fetchPendingRequests();
-  }, [loading, user]);
+  }, [loading, user]); // Re-run the effect if loading or user changes
 
-  const handleStatusChange = async (requestId: string, status: string) => {
+  const handleAccept = async (requestId: string) => {
     try {
-      const requestDocRef = doc(db, "requests", requestId);
-      await updateDoc(requestDocRef, { status }); // Update request status in Firestore
-      setPendingRequests((prev) => prev.filter((req) => req.id !== requestId)); // Remove request from pending list
+      const requestDocRef = doc(db, "requests", requestId); // Reference to the specific request
+      await updateDoc(requestDocRef, { status: "accepted" }); // Update the request status to accepted
+      setPendingRequests((prev) => prev.filter((request) => request.id !== requestId)); // Remove accepted request from the state
     } catch (error) {
-      console.error("Error updating request status: ", error);
+      console.error("Error accepting request: ", error);
+    }
+  };
+
+  const handleReject = async (requestId: string) => {
+    try {
+      const requestDocRef = doc(db, "requests", requestId); // Reference to the specific request
+      await updateDoc(requestDocRef, { status: "rejected" }); // Update the request status to rejected
+      setPendingRequests((prev) => prev.filter((request) => request.id !== requestId)); // Remove rejected request from the state
+    } catch (error) {
+      console.error("Error rejecting request: ", error);
     }
   };
 
   if (loading || fetching) {
-    return <div>Loading...</div>; // Show loading state while fetching data
+    return <div>Loading...</div>; // Show a loading state while data is being fetched
   }
 
   return (
@@ -86,34 +74,13 @@ const PendingPage = (): JSX.Element => {
         <ul>
           {pendingRequests.map((request) => (
             <li key={request.id} className="mb-4 p-4 border rounded shadow-sm">
+              <p><strong>From:</strong> {request.fromId}</p>
+              <p><strong>Message:</strong> {request.message}</p>
+              <p><strong>Status:</strong> {request.status}</p>
+              <p><strong>Requested on:</strong> {new Date(request.timestamp.toDate()).toLocaleString()}</p>
               <div>
-                {/* Display sender's profile information */}
-                {profiles[request.fromId] && (
-                  <div>
-                    <img
-                      src={profiles[request.fromId].photoUrl}
-                      alt="Profile"
-                      className="max-w-xs rounded-full shadow-sm mb-2"
-                    />
-                    <p><strong>{profiles[request.fromId].name}</strong></p>
-                  </div>
-                )}
-                <p><strong>Message:</strong> {request.message}</p>
-                <p><strong>Sent on:</strong> {new Date(request.timestamp.toDate()).toLocaleString()}</p>
-                
-                {/* Buttons to Accept/Reject */}
-                <button
-                  className="btn btn-primary mr-2"
-                  onClick={() => handleStatusChange(request.id, "accepted")}
-                >
-                  Accept
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => handleStatusChange(request.id, "rejected")}
-                >
-                  Reject
-                </button>
+                <button className="btn btn-success" onClick={() => handleAccept(request.id)}>Accept</button>
+                <button className="btn btn-danger" onClick={() => handleReject(request.id)}>Reject</button>
               </div>
             </li>
           ))}

@@ -13,47 +13,49 @@ type PageType = 'Pending' | 'Sent' | 'Approved';
 export default function Home() {
   const [activePage, setActivePage] = useState<PageType>('Pending');
   const { user, loading } = useAuth();
-  console.log("^_^ ~ file: page.tsx:16 ~ Home ~ user:", user.uid);
 
-  const [requests, setRequests] = useState<any>([]);
-  console.log("^_^ ~ file: page.tsx:19 ~ Home ~ requests:", requests);
-
+  const [sentPendingCount, setSentPendingCount] = useState(0); // Count for sent pending requests
+  const [newIncomingCount, setNewIncomingCount] = useState(0); // Count for new incoming requests
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
     if (!loading && user) {
-      const fetchRequests = async () => {
+      const fetchRequestCounts = async () => {
         try {
-          // Query the requests collection where uid matches the current user
-          const q = query(
+          // Query for counting sent requests with status "pending"
+          const sentQuery = query(
             collection(db, "requests"),
-            where("uid", "==", user.uid)
+            where("fromId", "==", user.uid),
+            where("status", "==", "pending")
           );
-          const querySnapshot = await getDocs(q);
+          const sentSnapshot = await getDocs(sentQuery);
+          setSentPendingCount(sentSnapshot.size); // Set the count for pending sent requests
 
-          // Store the filtered requests in the state
-          const requestData = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })) ;
-
-          setRequests(requestData);
+          // Query for counting new incoming requests with status "pending"
+          const incomingQuery = query(
+            collection(db, "requests"),
+            where("toId", "==", user.uid),
+            where("status", "==", "pending")
+          );
+          const incomingSnapshot = await getDocs(incomingQuery);
+          setNewIncomingCount(incomingSnapshot.size); // Set the count for new pending incoming requests
         } catch (error) {
-          console.error("Error fetching requests: ", error);
+          console.error("Error fetching request counts: ", error);
         } finally {
           setFetching(false);
         }
       };
 
-      fetchRequests();
+      fetchRequestCounts();
     }
   }, [loading, user]);
+
   // Function to render the correct component based on the active page
   const renderPage = () => {
-       switch (activePage) {
-         case 'Pending':
-           return <PendingPage />;
-           case 'Sent':
+    switch (activePage) {
+      case 'Pending':
+        return <PendingPage />;
+      case 'Sent':
         return <SentPage />;
       case 'Approved':
         return <ApprovedPage />;
@@ -61,7 +63,6 @@ export default function Home() {
         return <PendingPage />;
     }
   };
-
 
   return (
     <div>
@@ -83,7 +84,10 @@ export default function Home() {
                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             Pending
-            <span className="badge badge-sm badge-warning">NEW</span>
+            {/* Show the count of new pending requests */}
+            {newIncomingCount > 0 && (
+              <span className="badge badge-sm badge-warning">{newIncomingCount}</span>
+            )}
           </a>
         </li>
         <li>
@@ -101,12 +105,15 @@ export default function Home() {
                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Sent
-            <span className="badge badge-sm">1+</span>
+            {/* Show the count of sent pending requests */}
+            {sentPendingCount > 0 && (
+              <span className="badge badge-sm">{sentPendingCount}</span>
+            )}
           </a>
         </li>
         <li>
           <a onClick={() => setActivePage('Approved')}>
-          Approved
+            Approved
             <span className="badge badge-xs badge-info"></span>
           </a>
         </li>
