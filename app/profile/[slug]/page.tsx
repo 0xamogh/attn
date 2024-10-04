@@ -21,6 +21,13 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
   const [userData, setUserData] = useState<any>(null);
   const [message, setMessage] = useState(''); // State to hold the message input
   const [fetching, setFetching] = useState(true);
+  const [orderId, _] = useState(uuidv4())
+  const {
+    writeContract: createOrder,
+    isError: isContractWriteError,
+    isPending: isContractWritePending,
+    isSuccess: isContractWriteSuccess,
+  } = useWriteContract();
 
   useEffect(() => {
     // if (!loading && user) {
@@ -43,12 +50,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
     // }
   }, [loading, user, slug]);
 
-  const {
-    writeContract: createOrder,
-    isError: isContractWriteError,
-    isPending: isContractWritePending,
-    isSuccess: isContractWriteSuccess,
-  } = useWriteContract();
+
 
   // Generate and store the requestId in state
   const [requestId, setRequestId] = useState("");
@@ -56,7 +58,6 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
   const handleCreateOrder = () => {
     // Trigger the contract transaction if the message is not empty
     if (message.trim()) {
-      const orderId = uuidv4();
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 1); // Adds 1 day to the current date
 
@@ -76,23 +77,25 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
   };
 
   const handleSendMessage = async () => {
-    if (message.trim() === '') {
-      alert('Message cannot be empty');
+    if (message.trim() === "") {
+      alert("Message cannot be empty");
       return;
     }
 
     try {
-      const requestDocRef = collection(db, "requests"); // Reference to the "messages" collection
-      await addDoc(requestDocRef, {
+      const requestDocRef = doc(db, "requests", orderId); // Use doc() to set the document with a custom ID
+
+      await setDoc(requestDocRef, {
         fromId: user.uid, // current logged-in user
         toId: slug, // user being viewed
         message: message, // the message input
-        status: 'pending', // initial status
+        status: "pending", // initial status
         timestamp: new Date(),
+        orderId: orderId, // Save the orderId in the document as well
       });
 
-      alert('Message sent successfully!');
-      setMessage(''); // Clear the message input
+      alert("Message sent successfully with custom orderId!");
+      setMessage(""); // Clear the message input
     } catch (error) {
       console.error("Error sending message: ", error);
     }

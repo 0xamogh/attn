@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import db from '../../lib/firebase/firestore';
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore"; // Firestore imports
 import { useAuth } from '../context/authContext';
+import { useWriteContract } from 'wagmi';
+import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from '../constants/constants';
 
 interface Request {
   id: string;
@@ -15,7 +17,13 @@ const PendingPage = (): JSX.Element => {
   const { user, loading } = useAuth(); // Get the current user and loading state
   const [pendingRequests, setPendingRequests] = useState<Request[]>([]); // State to hold an array of pending requests
   const [fetching, setFetching] = useState(true); // State to indicate if data is being fetched
-
+  const {
+    writeContract,
+    isError: isContractWriteError,
+    isPending: isContractWritePending,
+    isSuccess: isContractWriteSuccess,
+  } = useWriteContract();
+  
   useEffect(() => {
     const fetchPendingRequests = async () => {
       if (!loading && user) {
@@ -40,6 +48,7 @@ const PendingPage = (): JSX.Element => {
 
     fetchPendingRequests();
   }, [loading, user]); // Re-run the effect if loading or user changes
+
 
   const handleAccept = async (requestId: string) => {
     try {
@@ -74,13 +83,58 @@ const PendingPage = (): JSX.Element => {
         <ul>
           {pendingRequests.map((request) => (
             <li key={request.id} className="mb-4 p-4 border rounded shadow-sm">
-              <p><strong>From:</strong> {request.fromId}</p>
-              <p><strong>Message:</strong> {request.message}</p>
-              <p><strong>Status:</strong> {request.status}</p>
-              <p><strong>Requested on:</strong> {new Date(request.timestamp.toDate()).toLocaleString()}</p>
+              <p>
+                <strong>From:</strong> {request.fromId}
+              </p>
+              <p>
+                <strong>Message:</strong> {request.message}
+              </p>
+              <p>
+                <strong>Status:</strong> {request.status}
+              </p>
+              <p>
+                <strong>Requested on:</strong>{" "}
+                {new Date(request.timestamp.toDate()).toLocaleString()}
+              </p>
               <div>
-                <button className="btn btn-success" onClick={() => handleAccept(request.id)}>Accept</button>
-                <button className="btn btn-danger" onClick={() => handleReject(request.id)}>Reject</button>
+                <button
+                  className="btn btn-success"
+                  onClick={() =>
+                    writeContract(
+                      {
+                        abi: ATTENTION_ESCROW_ABI,
+                        address: ATTENTION_ESCROW_ADDRESS,
+                        functionName: "approveOrder",
+                        args: [request.id],
+                      },
+                      {
+                        onSuccess: () => handleAccept(request.id),
+                        onError: () => console.log("Failed to accept request"),
+                      }
+                    )
+                  }
+                >
+                  Accept
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() =>
+                    writeContract(
+                      {
+                        abi: ATTENTION_ESCROW_ABI,
+                        address: ATTENTION_ESCROW_ADDRESS,
+                        functionName: "refundOrder",
+                        args: [request.id],
+                      },
+                      {
+                        onSuccess: () => handleReject(request.id),
+                        onError: () => console.log("Failed to reject request"),
+                      }
+                    )
+                  }
+                >
+                  Reject
+                </button>
               </div>
             </li>
           ))}
