@@ -104,7 +104,7 @@ const PendingPage = (): JSX.Element => {
                       {
                         abi: ATTENTION_ESCROW_ABI,
                         address: ATTENTION_ESCROW_ADDRESS,
-                        functionName: "approveOrder",
+                        functionName: "completeOrder",
                         args: [request.id],
                       },
                       {

@@ -7,6 +7,7 @@ import ApprovedPage from '../components/ApprovedPage';
 import { useAuth } from '../context/authContext';
 import db from '@/lib/firebase/firestore';
 import { query, collection, where, getDocs } from '@firebase/firestore';
+import { useWriteContract } from 'wagmi';
 
 type PageType = 'Pending' | 'Sent' | 'Approved';
 
@@ -17,7 +18,13 @@ export default function Home() {
   const [sentPendingCount, setSentPendingCount] = useState(0); // Count for sent pending requests
   const [newIncomingCount, setNewIncomingCount] = useState(0); // Count for new incoming requests
   const [fetching, setFetching] = useState(true);
-
+  const {
+    writeContract,
+    isError: isContractWriteError,
+    isPending: isContractWritePending,
+    isSuccess: isContractWriteSuccess,
+  } = useWriteContract();
+  
   useEffect(() => {
     if (!loading && user) {
       const fetchRequestCounts = async () => {

@@ -68,7 +68,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
         abi: ATTENTION_ESCROW_ABI,
         address: ATTENTION_ESCROW_ADDRESS,
         functionName: "createOrder",
-        args: [orderId, expiryTimestamp], // Pass the necessary arguments for createOrder
+        args: [orderId, expiryTimestamp, userData.walletAddress], // Pass the necessary arguments for createOrder
         value: BigInt("1"), // Send the ETH value in wei
       });
     } else {
