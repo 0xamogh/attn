@@ -19,6 +19,8 @@ interface BlogPostProps {
 export default function Profile({ params: { slug } }: BlogPostProps) {
   const { user, loading } = useAuth();
   const [userData, setUserData] = useState<any>(null);
+  console.log("^_^ ~ file: page.tsx:22 ~ Profile ~ userData:", userData);
+
   const [message, setMessage] = useState(''); // State to hold the message input
   const [fetching, setFetching] = useState(true);
   const [orderId, _] = useState(uuidv4())

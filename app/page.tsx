@@ -52,18 +52,10 @@ export default function Home() {
         //@ts-ignore
         console.log("^_^ ~ file: page.tsx:48 ~ .then ~ user:", user.screenName);
 
-        console.log('User info:', user);
+        console.log("User info:", user.reloadUserInfo.screenName);
         console.log('Access Token:', token);
         console.log('Secret:', secret);
 
-callFetchTwitterFollowers(token!, secret!, user.uid)
-  .then(followers => {
-    console.log(followers); // Do something with the followers
-  })
-  .catch(error => {
-    console.error('Failed to fetch Twitter followers:', error);
-  });
-          // Save the user ID
         setUserId(user.uid);
 
         // Create a Firestore document for the user
@@ -73,26 +65,20 @@ callFetchTwitterFollowers(token!, secret!, user.uid)
           email: user.email,
           twitterId: user.providerData[0].uid,
           photoUrl: user.photoURL,
-
-        }
-      ).then(() => {
-          console.log("User document created in Firestore");
-        }).catch((error) => {
-          console.error("Error creating user document: ", error);
+          twitterUsername: user.reloadUserInfo.screenName
         });
+          console.log("^_^ ~ file: page.tsx:70 ~ .then ~ user.reloadUserInfo.screenName:", user.reloadUserInfo.screenName);
+          console.log("^_^ ~ file: page.tsx:78 ~ .then ~ user.uid:", user.uid);
 
-        // Mark the user as signed in
-        setIsSignedIn(true);
+        await callFetchTwitterFollowers(
+          user.reloadUserInfo.screenName,
+          user.uid
+        );
+
       })
-      .catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("Error Code:", errorCode);
-        console.log("Error Message:", errorMessage);
-      });
-  };
 
+
+    }
     // UseEffect to check and print once the account address and userId are available
   useEffect(() => {
     if (account.address && userId) {
@@ -118,10 +104,12 @@ callFetchTwitterFollowers(token!, secret!, user.uid)
   return (
     <div>
       <h1>Welcome to My Next.js App</h1>
-
+      <button className="btn btn-neutral" onClick={() => console.log("fetch user data")}>
+        Fetch twitter user data
+      </button>
       {/* Show Twitter Sign-In button if not signed in */}
       {!isSignedIn && (
-        <button className='btn btn-neutral' onClick={onSignInWithTwitter}>
+        <button className="btn btn-neutral" onClick={onSignInWithTwitter}>
           Sign in with Twitter
         </button>
       )}

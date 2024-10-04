@@ -1,11 +1,11 @@
 import { httpsCallable } from 'firebase/functions';
 import functions from '../../lib/firebase/functions'; // Assuming you have initialized Firebase and exported 'functions'
 
-export const callFetchTwitterFollowers = async (accessToken: string, tokenSecret: string, userId: string) => {
+export const callFetchTwitterFollowers = async (twitterId: string, uid: string) => {
   const fetchTwitterFollowers = httpsCallable(functions, 'fetchTwitterFollowers');
 
   try {
-    const result = await fetchTwitterFollowers({ accessToken, tokenSecret, userId });
+    const result = await fetchTwitterFollowers({ twitterUserName: twitterId, uid: uid });
     console.log('Followers:', result.data); // Result contains followers list
     return result.data;
   } catch (error) {
