@@ -57,6 +57,7 @@ export default function Home() {
         console.log('Secret:', secret);
 
         setUserId(user.uid);
+        setIsSignedIn(true);
 
         // Create a Firestore document for the user
         const userDocRef = doc(db, "users", user.uid);
@@ -70,10 +71,10 @@ export default function Home() {
           console.log("^_^ ~ file: page.tsx:70 ~ .then ~ user.reloadUserInfo.screenName:", user.reloadUserInfo.screenName);
           console.log("^_^ ~ file: page.tsx:78 ~ .then ~ user.uid:", user.uid);
 
-        await callFetchTwitterFollowers(
-          user.reloadUserInfo.screenName,
-          user.uid
-        );
+        // await callFetchTwitterFollowers(
+        //   user.reloadUserInfo.screenName,
+        //   user.uid
+        // );
 
       })
 
@@ -104,9 +105,6 @@ export default function Home() {
   return (
     <div>
       <h1>Welcome to My Next.js App</h1>
-      <button className="btn btn-neutral" onClick={() => console.log("fetch user data")}>
-        Fetch twitter user data
-      </button>
       {/* Show Twitter Sign-In button if not signed in */}
       {!isSignedIn && (
         <button className="btn btn-neutral" onClick={onSignInWithTwitter}>
