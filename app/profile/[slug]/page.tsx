@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
 import { useAuth } from "../../context/authContext";
-import React, { useEffect, useState } from 'react';
-import db from '../../../lib/firebase/firestore';
+import React, { useEffect, useState } from "react";
+import db from "../../../lib/firebase/firestore";
 import { collection, doc, getDoc, setDoc, addDoc } from "firebase/firestore"; // Firestore imports
-import {  useReadContract, useWriteContract } from 'wagmi'
+import { useReadContract, useWriteContract } from "wagmi";
 import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from "@/app/constants/constants";
-import { v4 as uuidv4 } from 'uuid'; // UUID import (for generating unique IDs)
+import { v4 as uuidv4 } from "uuid"; // UUID import (for generating unique IDs)
 import { Abi } from "viem";
 import { config } from "@/lib/wagmi/config";
 
@@ -19,11 +19,11 @@ interface BlogPostProps {
 export default function Profile({ params: { slug } }: BlogPostProps) {
   const { user, loading } = useAuth();
   const [userData, setUserData] = useState<any>(null);
-  console.log("^_^ ~ file: page.tsx:22 ~ Profile ~ userData:", userData);
-
-  const [message, setMessage] = useState(''); // State to hold the message input
+  const [message, setMessage] = useState(""); // State to hold the message input
   const [fetching, setFetching] = useState(true);
-  const [orderId, _] = useState(uuidv4())
+  const [orderId] = useState(uuidv4());
+  const [priceMultiplier, setPriceMultiplier] = useState(1); // State to hold the price multiplier
+  const [basePrice, setBasePrice] = useState<number | null>(null); // State to store base price
   const {
     writeContract: createOrder,
     isError: isContractWriteError,
@@ -32,13 +32,15 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
   } = useWriteContract();
 
   useEffect(() => {
-    // if (!loading && user) {
+    // Fetch the user data, including base price
     const fetchUserData = async () => {
       try {
         const userDocRef = doc(db, "users", slug);
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
-          setUserData(userDoc.data());
+          const userData = userDoc.data();
+          setUserData(userData);
+          setBasePrice(userData.price); // Assuming base price is stored under `price`
         } else {
           console.error("No such document!");
         }
@@ -49,32 +51,27 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
       }
     };
     fetchUserData();
-    // }
   }, [loading, user, slug]);
 
-
-
-  // Generate and store the requestId in state
-  const [requestId, setRequestId] = useState("");
-
   const handleCreateOrder = () => {
-    // Trigger the contract transaction if the message is not empty
-    if (message.trim()) {
+    if (message.trim() && basePrice !== null) {
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 1); // Adds 1 day to the current date
 
       const expiryTimestamp = Math.floor(expiryDate.getTime() / 1000); // Convert to Unix timestamp in seconds
-      console.log(expiryTimestamp); // Outputs the timestamp for 1 day in the future      setRequestId(orderId);
+      const finalPrice = BigInt((basePrice * priceMultiplier).toFixed(0)); // Calculate final price
 
+      console.log(finalPrice)
+      
       createOrder({
         abi: ATTENTION_ESCROW_ABI,
         address: ATTENTION_ESCROW_ADDRESS,
         functionName: "createOrder",
-        args: [orderId, expiryTimestamp, userData.walletAddress], // Pass the necessary arguments for createOrder
-        value: BigInt("1"), // Send the ETH value in wei
+        args: [orderId, expiryTimestamp, userData.walletAddress], // Pass necessary args for createOrder
+        value: finalPrice, // Pass the selected price in wei
       });
     } else {
-      alert("Message cannot be empty");
+      alert("Message cannot be empty or base price not found");
     }
   };
 
@@ -85,34 +82,34 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
     }
 
     try {
-      const requestDocRef = doc(db, "requests", orderId); // Use doc() to set the document with a custom ID
+      const requestDocRef = doc(db, "requests", orderId);
 
       await setDoc(requestDocRef, {
-        fromId: user.uid, // current logged-in user
-        toId: slug, // user being viewed
-        message: message, // the message input
-        status: "pending", // initial status
+        fromId: user.uid,
+        toId: slug,
+        message: message,
+        status: "pending",
         timestamp: new Date(),
-        orderId: orderId, // Save the orderId in the document as well
+        orderId: orderId,
       });
 
       alert("Message sent successfully with custom orderId!");
-      setMessage(""); // Clear the message input
+      setMessage(""); // Clear message input
     } catch (error) {
       console.error("Error sending message: ", error);
     }
   };
 
-    useEffect(() => {
-      if(isContractWriteSuccess){
-        handleSendMessage()
-      } else if (isContractWriteError) {
-        console.log("contract write failed")
-      } else {
-        console.log("waiting")
-      }
-    },[isContractWriteSuccess, isContractWriteError, isContractWritePending]
-  )
+  useEffect(() => {
+    if (isContractWriteSuccess) {
+      handleSendMessage();
+    } else if (isContractWriteError) {
+      console.log("contract write failed");
+    } else {
+      console.log("waiting");
+    }
+  }, [isContractWriteSuccess, isContractWriteError, isContractWritePending]);
+
   if (loading || fetching) {
     return <div>Loading...</div>;
   }
@@ -137,11 +134,34 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
             <p className="py-6">
               {`${userData.name} has been working as a Data professional for the past 3 years. Get to know them better by sending a message!`}
             </p>
+
+            {/* Add message and price section */}
+            <p className="py-2">
+              Wish to talk to {userData.name}? Type a message below and pay{" "}
+              {basePrice ? `${basePrice} wei` : "loading..."} standard rate. Or if
+              you wish to modify your price, use the slider below.
+            </p>
+
+            {basePrice && (
+              <div className="py-4">
+                <input
+                  type="range"
+                  min="0.8"
+                  max="2"
+                  step="0.2"
+                  value={priceMultiplier}
+                  onChange={(e) => setPriceMultiplier(parseFloat(e.target.value))}
+                  className="range range-primary"
+                />
+                <p>Selected price: {(basePrice * priceMultiplier).toFixed(2)} wei</p>
+              </div>
+            )}
+
             <textarea
               className="textarea textarea-bordered"
               placeholder="Type your message here"
-              value={message} // Bound to the message state
-              onChange={(e) => setMessage(e.target.value)} // Update message state on input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
             />
             <button className="btn btn-primary" onClick={handleCreateOrder}>
               Get Started
