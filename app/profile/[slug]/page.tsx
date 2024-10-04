@@ -4,6 +4,11 @@ import { useAuth } from "../../context/authContext";
 import React, { useEffect, useState } from 'react';
 import db from '../../../lib/firebase/firestore';
 import { collection, doc, getDoc, setDoc, addDoc } from "firebase/firestore"; // Firestore imports
+import {  useReadContract, useWriteContract } from 'wagmi'
+import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from "@/app/constants/constants";
+import { v4 as uuidv4 } from 'uuid'; // UUID import (for generating unique IDs)
+import { Abi } from "viem";
+import { config } from "@/lib/wagmi/config";
 
 interface BlogPostProps {
   params: {
@@ -38,6 +43,38 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
     // }
   }, [loading, user, slug]);
 
+  const {
+    writeContract: createOrder,
+    isError: isContractWriteError,
+    isPending: isContractWritePending,
+    isSuccess: isContractWriteSuccess,
+  } = useWriteContract();
+
+  // Generate and store the requestId in state
+  const [requestId, setRequestId] = useState("");
+
+  const handleCreateOrder = () => {
+    // Trigger the contract transaction if the message is not empty
+    if (message.trim()) {
+      const orderId = uuidv4();
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 1); // Adds 1 day to the current date
+
+      const expiryTimestamp = Math.floor(expiryDate.getTime() / 1000); // Convert to Unix timestamp in seconds
+      console.log(expiryTimestamp); // Outputs the timestamp for 1 day in the future      setRequestId(orderId);
+
+      createOrder({
+        abi: ATTENTION_ESCROW_ABI,
+        address: ATTENTION_ESCROW_ADDRESS,
+        functionName: "createOrder",
+        args: [orderId, expiryTimestamp], // Pass the necessary arguments for createOrder
+        value: BigInt("1"), // Send the ETH value in wei
+      });
+    } else {
+      alert("Message cannot be empty");
+    }
+  };
+
   const handleSendMessage = async () => {
     if (message.trim() === '') {
       alert('Message cannot be empty');
@@ -61,6 +98,16 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
     }
   };
 
+    useEffect(() => {
+      if(isContractWriteSuccess){
+        handleSendMessage()
+      } else if (isContractWriteError) {
+        console.log("contract write failed")
+      } else {
+        console.log("waiting")
+      }
+    },[isContractWriteSuccess, isContractWriteError, isContractWritePending]
+  )
   if (loading || fetching) {
     return <div>Loading...</div>;
   }
@@ -91,7 +138,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
               value={message} // Bound to the message state
               onChange={(e) => setMessage(e.target.value)} // Update message state on input
             />
-            <button className="btn btn-primary" onClick={handleSendMessage}>
+            <button className="btn btn-primary" onClick={handleCreateOrder}>
               Get Started
             </button>
           </div>
