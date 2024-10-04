@@ -70,10 +70,10 @@ export default function Home() {
           console.log("^_^ ~ file: page.tsx:70 ~ .then ~ user.reloadUserInfo.screenName:", user.reloadUserInfo.screenName);
           console.log("^_^ ~ file: page.tsx:78 ~ .then ~ user.uid:", user.uid);
 
-        await callFetchTwitterFollowers(
-          user.reloadUserInfo.screenName,
-          user.uid
-        );
+        // await callFetchTwitterFollowers(
+        //   user.reloadUserInfo.screenName,
+        //   user.uid
+        // );
 
       })
 
