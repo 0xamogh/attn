@@ -9,6 +9,7 @@ import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from "@/app/constants/
 import { v4 as uuidv4 } from "uuid"; // UUID import (for generating unique IDs)
 import { Abi } from "viem";
 import { config } from "@/lib/wagmi/config";
+import { open, playfair } from "../../page";
 
 interface BlogPostProps {
   params: {
@@ -115,13 +116,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
   }
 
   return (
-    <div
-      className="hero min-h-screen"
-      style={{
-        backgroundImage: "url(https://t4.ftcdn.net/jpg/01/25/93/71/240_F_125937187_K6ae4w2j2cTldlBikheFfwFhl4mkw4I6.jpg)",
-      }}
-    >
-      <div className="hero-overlay bg-opacity-60"></div>
+    <div className="hero min-h-screen">
       <div className="hero-content text-neutral-content text-center">
         <div className="max-w-md">
           <img
@@ -130,16 +125,18 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
             alt="User profile"
           />
           <div>
-            <h1 className="text-5xl font-bold">{userData.name}</h1>
-            <p className="py-6">
+            <h1 className={" text-black text-6xl " + playfair.className}>
+              {userData.name}
+            </h1>
+            <p className={"text-black " + open.className}>
               {`${userData.name} has been working as a Data professional for the past 3 years. Get to know them better by sending a message!`}
             </p>
 
             {/* Add message and price section */}
-            <p className="py-2">
+            <p className={"text-black " + open.className}>
               Wish to talk to {userData.name}? Type a message below and pay{" "}
-              {basePrice ? `${basePrice} wei` : "loading..."} standard rate. Or if
-              you wish to modify your price, use the slider below.
+              {basePrice ? `${basePrice} wei` : "loading..."} standard rate. Or
+              if you wish to modify your price, use the slider below.
             </p>
 
             {basePrice && (
@@ -150,10 +147,14 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
                   max="2"
                   step="0.2"
                   value={priceMultiplier}
-                  onChange={(e) => setPriceMultiplier(parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    setPriceMultiplier(parseFloat(e.target.value))
+                  }
                   className="range range-primary"
                 />
-                <p>Selected price: {(basePrice * priceMultiplier).toFixed(2)} wei</p>
+                <p>
+                  Selected price: {(basePrice * priceMultiplier).toFixed(2)} wei
+                </p>
               </div>
             )}
 

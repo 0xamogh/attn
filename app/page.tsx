@@ -11,7 +11,18 @@ import { fetchTwitterUserInfoById } from '../lib/twitter/twitter';
 import { httpsCallable } from 'firebase/functions';
 import functions  from '../lib/firebase/functions';
 import { callFetchTwitterFollowers } from './helpers/functions';
+import { Playfair_Display, DM_Sans as Open_Sans } from "next/font/google";
 
+
+export const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400"], // Specify font weights
+});
+
+export const open = Open_Sans({
+  subsets: ["latin"],
+  weight: ["400"], // Specify font weights
+});
 
 const sdk = new CoinbaseWalletSDK({
   appName: 'My App Name',
@@ -107,28 +118,50 @@ export default function Home() {
 
 
   return (
-    <div class="bg-cream min-h-80">
-      <h1 class="text-black text-6xl">
-        👋🏻 welcome to <span class="italic">attn.</span>
-      </h1>
-      {/* Show Twitter Sign-In button if not signed in */}
-      {!isSignedIn && (
-        <button className="btn btn-neutral" onClick={onSignInWithTwitter}>
-          Sign in with Twitter
-        </button>
-      )}
-
-      {/* After sign-in, show the Create Wallet button */}
-      {isSignedIn && !account.isConnected && (
-        <button className="btn btn-neutral" onClick={createWallet}>
-          Create Wallet
-        </button>
-      )}
-
-      {/* Display connected account information */}
-      {account.isConnected && isSignedIn && (
-        <h2>Your connected account is {account.address}</h2>
-      )}
+    <div className="hero bg-cream min-h-screen">
+      <div className="hero-content text-center">
+        <div className="max-w-md">
+          <h1 className={" text-black text-6xl " + playfair.className}>
+            {"👋🏻 \n welcome to"} <span className="italic">attn.</span>
+          </h1>
+          <p className={"py-6 text-black " + open.className}>
+            reach out to someone you can't.
+          </p>
+          {!isSignedIn && (
+            <button
+              className={
+                "my-6 btn btn-md rounded-full btn-primary shadow-xl text-white " +
+                open.className
+              }
+              onClick={onSignInWithTwitter}
+            >
+              Get Started
+            </button>
+          )}
+          {/* After sign-in, show the Create Wallet button */}
+          {isSignedIn && !account.isConnected && (
+            <button
+              className={
+                "my-6 btn btn-md rounded-full btn-neutral shadow-xl text-white " +
+                open.className
+              }
+              onClick={createWallet}
+            >
+              Connect Smart Wallet
+            </button>
+          )}
+          {account.isConnected && isSignedIn && (
+            <h2 className={"py-6 text-black " + open.className}>
+              Your connected account is {account.address}
+            </h2>
+          )}
+          {/* <button
+            className={"my-6 btn btn-background border-2 shadow-xl text-bold text-black border-black	 " + open.className}
+          >
+            Get Started
+          </button> */}
+        </div>
+      </div>
     </div>
   );
 }

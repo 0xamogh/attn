@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import db from '../../lib/firebase/firestore';
 import { collection, query, where, getDocs } from "firebase/firestore"; // Firestore imports
 import { useAuth } from '../context/authContext';
-
+import {open, playfair} from "../page"
 interface Request {
   id: string;
   fromId: string;
@@ -53,11 +53,11 @@ const ApprovedPage = (): JSX.Element => {
       ) : (
         <ul>
           {approvedRequests.map((request) => (
-            <li key={request.id} className="mb-4 p-4 border rounded shadow-sm">
-              <p><strong>From:</strong> {request.fromId}</p>
-              <p><strong>Message:</strong> {request.message}</p>
-              <p><strong>Status:</strong> {request.status}</p>
-              <p><strong>Approved on:</strong> {new Date(request.timestamp.toDate()).toLocaleString()}</p>
+            <li key={request.id} className="mb-4 p-4 border border-black rounded shadow-sm">
+              <p className={"text-black " + open.className}><strong>From:</strong> {request.fromId}</p>
+              <p className={"text-black " + open.className}><strong>Message:</strong> {request.message}</p>
+              <p className={"text-black " + open.className}><strong>Status:</strong> {request.status}</p>
+              <p className={"text-black " + open.className}><strong>Approved on:</strong> {new Date(request.timestamp.toDate()).toLocaleString()}</p>
             </li>
           ))}
         </ul>

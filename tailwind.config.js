@@ -11,5 +11,15 @@ module.exports = {
             'cream' : '#fff6ea'
           }
         }
+      },
+      daisyui : {
+        themes: [
+          {mytheme : {
+            "primary" : "#ff5757",
+            "background":  '#fff6ea',
+            "neutral":"#38b6ff",
+          }
+        }
+        ]
       }  
   };

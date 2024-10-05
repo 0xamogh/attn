@@ -83,22 +83,22 @@ const PendingPage = (): JSX.Element => {
         <ul>
           {pendingRequests.map((request) => (
             <li key={request.id} className="mb-4 p-4 border rounded shadow-sm">
-              <p>
+              <p className={"text-black " + open.className}>
                 <strong>From:</strong> {request.fromId}
               </p>
-              <p>
+              <p className={"text-black " + open.className}>
                 <strong>Message:</strong> {request.message}
               </p>
-              <p>
+              <p className={"text-black " + open.className}>
                 <strong>Status:</strong> {request.status}
               </p>
-              <p>
+              <p className={"text-black " + open.className}>
                 <strong>Requested on:</strong>{" "}
                 {new Date(request.timestamp.toDate()).toLocaleString()}
               </p>
               <div>
                 <button
-                  className="btn btn-success"
+                  className="btn btn-neutral text-white btn-md"
                   onClick={() =>
                     writeContract(
                       {
@@ -117,7 +117,7 @@ const PendingPage = (): JSX.Element => {
                   Accept
                 </button>
                 <button
-                  className="btn btn-danger"
+                  className="btn mx-5 btn-primary text-white"
                   onClick={() =>
                     writeContract(
                       {
