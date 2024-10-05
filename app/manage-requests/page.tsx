@@ -8,7 +8,7 @@ import { useAuth } from '../context/authContext';
 import db from '@/lib/firebase/firestore';
 import { query, collection, where, getDocs } from '@firebase/firestore';
 import { useWriteContract } from 'wagmi';
-import {open, playfair} from "../page"
+import {open, playfair} from "../../lib/font/font"
 type PageType = 'Pending' | 'Sent' | 'Approved';
 
 export default function Home() {

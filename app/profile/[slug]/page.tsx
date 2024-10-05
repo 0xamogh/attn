@@ -9,7 +9,7 @@ import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from "@/app/constants/
 import { v4 as uuidv4 } from "uuid"; // UUID import (for generating unique IDs)
 import { Abi } from "viem";
 import { config } from "@/lib/wagmi/config";
-import { open, playfair } from "../../page";
+import { open, playfair } from "../../../lib/font/font";
 
 interface BlogPostProps {
   params: {
@@ -86,6 +86,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
       const requestDocRef = doc(db, "requests", orderId);
 
       await setDoc(requestDocRef, {
+        // @ts-ignore
         fromId: user.uid,
         toId: slug,
         message: message,

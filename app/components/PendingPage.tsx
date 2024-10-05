@@ -4,6 +4,7 @@ import { collection, query, where, getDocs, updateDoc, doc } from "firebase/fire
 import { useAuth } from '../context/authContext';
 import { useWriteContract } from 'wagmi';
 import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from '../constants/constants';
+import { open, playfair } from "../../lib/font/font";
 
 interface Request {
   id: string;

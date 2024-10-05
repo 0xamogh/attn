@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import db from '../../lib/firebase/firestore';
 import { collection, query, where, getDocs } from "firebase/firestore"; // Firestore imports
 import { useAuth } from '../context/authContext';
-import { open, playfair } from "../page";
+import { open, playfair } from "../../lib/font/font";
 
 interface Request {
   id: string;
