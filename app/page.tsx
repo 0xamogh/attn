@@ -11,23 +11,7 @@ import { fetchTwitterUserInfoById } from '../lib/twitter/twitter';
 import { httpsCallable } from 'firebase/functions';
 import functions  from '../lib/firebase/functions';
 import { callFetchTwitterFollowers } from './helpers/functions';
-import { Playfair_Display, DM_Sans as Open_Sans } from "next/font/google";
-
-
-export const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400"], // Specify font weights
-});
-
-export const open = Open_Sans({
-  subsets: ["latin"],
-  weight: ["400"], // Specify font weights
-});
-
-const sdk = new CoinbaseWalletSDK({
-  appName: 'My App Name',
-  appChainIds: [8453],
-});
+import {open, playfair} from "../lib/font/font"
 
 export default function Home() {
   const { connectors, connect } = useConnect();
@@ -63,34 +47,27 @@ export default function Home() {
         //@ts-ignore
         console.log("^_^ ~ file: page.tsx:48 ~ .then ~ user:", user.screenName);
 
-        console.log("User info:", user.reloadUserInfo.screenName);
-        console.log('Access Token:', token);
-        console.log('Secret:', secret);
+        //@ts-ignore
+        const twitterUsername = user.reloadUserInfo.screenName;
 
         setUserId(user.uid);
         setIsSignedIn(true);
 
         // Create a Firestore document for the user
         const userDocRef = doc(db, "users", user.uid);
-        setDoc(userDocRef, {
-          name: user.displayName,
-          email: user.email,
-          twitterId: user.providerData[0].uid,
-          photoUrl: user.photoURL,
-          twitterUsername: user.reloadUserInfo.screenName
-        },
-        {
-          merge : true
-        }
-      );
-          console.log("^_^ ~ file: page.tsx:70 ~ .then ~ user.reloadUserInfo.screenName:", user.reloadUserInfo.screenName);
-          console.log("^_^ ~ file: page.tsx:78 ~ .then ~ user.uid:", user.uid);
-
-        // await callFetchTwitterFollowers(
-        //   user.reloadUserInfo.screenName,
-        //   user.uid
-        // );
-
+        setDoc(
+          userDocRef,
+          {
+            name: user.displayName,
+            email: user.email,
+            twitterId: user.providerData[0].uid,
+            photoUrl: user.photoURL,
+            twitterUsername: twitterUsername,
+          },
+          {
+            merge: true,
+          }
+        );
       })
 
 

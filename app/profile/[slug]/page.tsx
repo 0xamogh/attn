@@ -8,7 +8,6 @@ import { useReadContract, useWriteContract } from "wagmi";
 import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from "@/app/constants/constants";
 import { v4 as uuidv4 } from "uuid"; // UUID import (for generating unique IDs)
 import { Abi } from "viem";
-import { config } from "@/lib/wagmi/config";
 import { open, playfair } from "../../../lib/font/font";
 
 interface BlogPostProps {
