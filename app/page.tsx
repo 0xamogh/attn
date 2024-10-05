@@ -107,8 +107,10 @@ export default function Home() {
 
 
   return (
-    <div>
-      <h1>Welcome to My Next.js App</h1>
+    <div class="bg-cream min-h-80">
+      <h1 class="text-black text-6xl">
+        👋🏻 welcome to <span class="italic">attn.</span>
+      </h1>
       {/* Show Twitter Sign-In button if not signed in */}
       {!isSignedIn && (
         <button className="btn btn-neutral" onClick={onSignInWithTwitter}>
