@@ -7,7 +7,6 @@ import auth, { provider } from '../lib/firebase/auth';
 import { TwitterAuthProvider, signInWithPopup } from 'firebase/auth';
 import db from '../lib/firebase/firestore';
 import { doc, setDoc, updateDoc } from "firebase/firestore"; // Firestore imports
-import { fetchTwitterUserInfoById } from '../lib/twitter/twitter';
 import { httpsCallable } from 'firebase/functions';
 import functions  from '../lib/firebase/functions';
 import { callFetchTwitterFollowers } from './helpers/functions';

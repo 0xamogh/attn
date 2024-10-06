@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import WagmiProviderWrapper from "./components/WagmiProviderWrapper";
 import { AuthProvider } from "./context/authContext";
+import { headers } from "next/headers";
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -24,13 +26,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookie = headers().get("cookie");
+
   return (
     <html lang="en">
       <body
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <WagmiProviderWrapper>{children}</WagmiProviderWrapper>
+          <WagmiProviderWrapper cookie={cookie}>{children}</WagmiProviderWrapper>
         </AuthProvider>
       </body>
     </html>
