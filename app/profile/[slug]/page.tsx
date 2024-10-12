@@ -77,7 +77,7 @@ const router = useRouter();
     }
   },[slug]);
 
-  console.log("price", BigInt(parseEther(String(basePrice! * priceMultiplier))));
+  console.log("price", BigInt(parseEther(String(basePrice! * priceMultiplier*0.01))));
   const handleCreateOrder = () => {
 
     if(!user){
