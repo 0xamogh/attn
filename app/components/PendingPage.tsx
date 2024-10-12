@@ -150,21 +150,21 @@ const PendingPage = (): JSX.Element => {
               <div>
                 <button
                   className="btn btn-neutral text-white btn-md"
-                  // onClick={() =>
-                  //   writeContract(
-                  //     {
-                  //       abi: ATTENTION_ESCROW_ABI,
-                  //       address: ATTENTION_ESCROW_ADDRESS,
-                  //       functionName: "completeOrder",
-                  //       args: [request.id],
-                  //     },
-                  //     {
-                  //       onSuccess: () => handleAccept(request.id, request.fromId),
-                  //       onError: () => console.log("Failed to accept request"),
-                  //     }
-                  //   )
-                  // }
-                  onClick={() => handleAccept(request.id,request.fromId)}
+                  onClick={() =>
+                    writeContract(
+                      {
+                        abi: ATTENTION_ESCROW_ABI,
+                        address: ATTENTION_ESCROW_ADDRESS,
+                        functionName: "completeOrder",
+                        args: [request.id],
+                      },
+                      {
+                        onSuccess: () => handleAccept(request.id, request.fromId),
+                        onError: () => console.log("Failed to accept request"),
+                      }
+                    )
+                  }
+                  // onClick={() => handleAccept(request.id,request.fromId)}
                 >
                   Accept
                 </button>
