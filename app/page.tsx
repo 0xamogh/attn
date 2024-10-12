@@ -102,8 +102,16 @@ export default function Home() {
         if (userDoc.exists()) {
           // Store the fetched user data in state
           setUserData(userDoc.data());
-          const twitterId = userDoc.data().twitterUsername;
-          setTwitterUsername(twitterId)
+          const userData = userDoc.data();
+          setTwitterUsername(userData.twitterUsername)
+          if(!userData.twitterInfo){
+                       await callFetchTwitterFollowers(
+                         userData.twitterUsername,
+                         uid
+                       );
+
+          }
+
         } else {
           console.error("No such document!");
         }
