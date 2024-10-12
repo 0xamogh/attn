@@ -164,15 +164,13 @@ const PendingPage = (): JSX.Element => {
           ))}
         </ul>
       )}
-
-      {/* DaisyUI Modal for chat confirmation */}
       {isModalOpen && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h3 className={"text-lg font-bold " + open.className}>
+            <h3 className={"text-lg font-bold text-black " + open.className}>
               You have accepted the chat request from {currentFromId}.
             </h3>
-            <p className={"py-4 " + open.className}>
+            <p className={"py-4 text-black " + open.className}>
               When you close this box, you will be redirected to their chat on Telegram.
             </p>
             <div className="modal-action">
