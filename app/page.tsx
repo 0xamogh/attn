@@ -12,6 +12,7 @@ import functions  from '../lib/firebase/functions';
 import { callFetchTwitterFollowers } from './helpers/functions';
 import {open, playfair} from "../lib/font/font"
 import Link from 'next/link';
+import { useAuth } from './context/authContext';
 
 export default function Home() {
   const { connectors, connect } = useConnect();
@@ -22,6 +23,7 @@ export default function Home() {
   const [userId, setUserId] = useState<string>(); // Store the Firebase user id
   const [twitterUsername, setTwitterUsername] = useState<string>()
   const [toastVisible, setToastVisible] = useState(false);
+  const { user, loading } = useAuth();
 
    const handleCopy = () => {
      const profileUrl = window.location.origin + "/profile/" + twitterUsername; // Your specific URL to be copied
@@ -83,6 +85,12 @@ export default function Home() {
 
 
     }
+
+    useEffect(()=> {
+      if(user){
+        setIsSignedIn(true)
+      }
+    },[account, user])
     // UseEffect to check and print once the account address and userId are available
   useEffect(() => {
     if (account.address && userId) {
