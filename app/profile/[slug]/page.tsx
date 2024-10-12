@@ -3,7 +3,7 @@
 import { useAuth } from "../../context/authContext";
 import React, { useEffect, useState } from "react";
 import db from "../../../lib/firebase/firestore";
-import { collection, doc, getDoc, setDoc, addDoc } from "firebase/firestore"; // Firestore imports
+import { collection, doc, getDoc, setDoc, addDoc, query, where, getDocs } from "firebase/firestore"; // Firestore imports
 import { useReadContract, useWriteContract } from "wagmi";
 import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from "@/app/constants/constants";
 import { v4 as uuidv4 } from "uuid"; // UUID import (for generating unique IDs)
@@ -31,18 +31,28 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
     isSuccess: isContractWriteSuccess,
   } = useWriteContract();
 
+  const [isMyPage, setIsMyPage] = useState(true)
+
   useEffect(() => {
-    // Fetch the user data, including base price
+
+  }, [user, slug])
+
+  useEffect(() => {
+    // Fetch the user data, including base price, by matching screenName with slug
     const fetchUserData = async () => {
       try {
-        const userDocRef = doc(db, "users", slug);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
+        const q = query(
+          collection(db, "users"),
+          where("twitterUsername", "==", slug)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0]; // Assuming the screenName is unique and you take the first result
           const userData = userDoc.data();
           setUserData(userData);
           setBasePrice(userData.price); // Assuming base price is stored under `price`
         } else {
-          console.error("No such document!");
+          console.error("No matching user found!");
         }
       } catch (error) {
         console.error("Error fetching user data: ", error);
@@ -50,6 +60,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
         setFetching(false);
       }
     };
+
     fetchUserData();
   }, [loading, user, slug]);
 
