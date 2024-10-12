@@ -175,7 +175,7 @@ const router = useRouter();
 
           {/* Move the description below the image and name */}
           <p className={"text-black text-base mb-4 " + open.className}>
-            {`${userData.name} ${userData.twitterInfo.description}. Get to know them better by sending a message!`}
+            {`${userData.twitterInfo.description}`}
           </p>
 
           {/* Add message and price section */}
