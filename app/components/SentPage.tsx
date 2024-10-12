@@ -75,7 +75,7 @@ const SentPage = (): JSX.Element => {
           {sentRequests.map((request) => (
             <li
               key={request.id}
-              className="mb-4 p-4 border border-black rounded shadow-sm"
+              className="mb-4 p-4 border rounded shadow-sm"
             >
               <p className={"text-black " + open.className}>
                 <strong>To:</strong> {request.toId}
