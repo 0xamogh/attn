@@ -11,6 +11,7 @@ import { httpsCallable } from 'firebase/functions';
 import functions  from '../lib/firebase/functions';
 import { callFetchTwitterFollowers } from './helpers/functions';
 import {open, playfair} from "../lib/font/font"
+import Link from 'next/link';
 
 export default function Home() {
   const { connectors, connect } = useConnect();
@@ -131,11 +132,26 @@ export default function Home() {
               Your connected account is {account.address}
             </h2>
           )}
-          {/* <button
-            className={"my-6 btn btn-background border-2 shadow-xl text-bold text-black border-black	 " + open.className}
-          >
-            Get Started
-          </button> */}
+
+          {isSignedIn && account.isConnected && (
+            <>
+              <h2 className={"py-6 text-black " + open.className}>
+                Your connected account is {account.address}
+              </h2>
+
+              {/* Render "Go to Manage Requests" button after the user is signed in and wallet is connected */}
+              <Link href="/manage-requests">
+                <button
+                  className={
+                    "my-6 btn btn-md rounded-full btn-neutral shadow-xl text-white " +
+                    open.className
+                  }
+                >
+                  Go to Manage Requests
+                </button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>
