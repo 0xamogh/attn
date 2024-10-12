@@ -48,7 +48,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
           const userData = userDoc.data();
 
           // Check if the logged-in user matches the queried user (user.uid)
-          if (user && user.uid === userData.uid) {
+          if (user && user.uid === userDoc.id) {
             console.log("Current user matches the queried user.");
             setIsMyPage(true)
             // Perform any additional actions if needed
@@ -206,7 +206,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
                 />
                 {/* Centered Button */}
                 <button
-                  className="btn btn-primary mt-4"
+                  className="btn text-white btn-primary mt-4"
                   onClick={handleCreateOrder}
                 >
                   Get Started
@@ -214,7 +214,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
               </div>
             </>
           )}
-          <button
+         {isMyPage &&  <button
             className={
               "m-6 btn btn-md rounded-full btn-primary shadow-xl text-white " +
               open.className
@@ -222,7 +222,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
             onClick={handleCopy}
           >
             Share your profile
-          </button>
+          </button>}
         </div>
       </div>
       {toastVisible && (
