@@ -20,6 +20,16 @@ export default function Home() {
   // State to check if the user is signed in with Twitter
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [userId, setUserId] = useState<string>(); // Store the Firebase user id
+  const [twitterUsername, setTwitterUsername] = useState<string>()
+  const [toastVisible, setToastVisible] = useState(false);
+
+   const handleCopy = () => {
+     const profileUrl = window.location.origin + "/profile/" + twitterUsername; // Your specific URL to be copied
+     navigator.clipboard.writeText(profileUrl).then(() => {
+       setToastVisible(true); // Show the toast
+       setTimeout(() => setToastVisible(false), 3000); // Hide the toast after 3 seconds
+     });
+   };
 
   // Function to create wallet
   const createWallet = useCallback(() => {
@@ -52,6 +62,7 @@ export default function Home() {
 
         setUserId(user.uid);
         setIsSignedIn(true);
+        setTwitterUsername(twitterUsername);
 
         // Create a Firestore document for the user
         const userDocRef = doc(db, "users", user.uid);
@@ -95,65 +106,78 @@ export default function Home() {
 
 
   return (
-    <div className="hero bg-cream min-h-screen">
-      <div className="hero-content text-center">
-        <div className="max-w-md">
-          <h1 className={" text-black text-6xl " + playfair.className}>
-            {"👋🏻 \n welcome to"} <span className="italic">attn.</span>
-          </h1>
-          <p className={"py-6 text-black " + open.className}>
-            reach out to someone you can't.
-          </p>
-          {!isSignedIn && (
-            <button
-              className={
-                "my-6 btn btn-md rounded-full btn-primary shadow-xl text-white " +
-                open.className
-              }
-              onClick={onSignInWithTwitter}
-            >
-              Get Started
-            </button>
-          )}
-          {/* After sign-in, show the Create Wallet button */}
-          {isSignedIn && !account.isConnected && (
-            <button
-              className={
-                "my-6 btn btn-md rounded-full btn-neutral shadow-xl text-white " +
-                open.className
-              }
-              onClick={createWallet}
-            >
-              Connect Smart Wallet
-            </button>
-          )}
-          {account.isConnected && isSignedIn && (
-            <h2 className={"py-6 text-black " + open.className}>
-              Your connected account is {account.address}
-            </h2>
-          )}
+    <>
+      <div className="hero bg-cream min-h-screen">
+        <div className="hero-content text-center">
+          <div className="max-w-md">
+            <h1 className={" text-black text-6xl " + playfair.className}>
+              {"👋🏻 \n welcome to"} <span className="italic">attn.</span>
+            </h1>
+            <p className={"py-6 text-black " + open.className}>
+              reach out to someone you can't.
+            </p>
+            {!isSignedIn && (
+              <button
+                className={
+                  "my-6 btn btn-md rounded-full btn-primary shadow-xl text-white " +
+                  open.className
+                }
+                onClick={onSignInWithTwitter}
+              >
+                Get Started
+              </button>
+            )}
+            {/* After sign-in, show the Create Wallet button */}
+            {isSignedIn && !account.isConnected && (
+              <button
+                className={
+                  "my-6 btn btn-md rounded-full btn-neutral shadow-xl text-white " +
+                  open.className
+                }
+                onClick={createWallet}
+              >
+                Connect Smart Wallet
+              </button>
+            )}
 
-          {isSignedIn && account.isConnected && (
-            <>
-              <h2 className={"py-6 text-black " + open.className}>
-                Your connected account is {account.address}
-              </h2>
+            {isSignedIn && account.isConnected && (
+              <>
+                <h2 className={"py-6 text-black " + open.className}>
+                  Your connected account is {account.address}
+                </h2>
 
-              {/* Render "Go to Manage Requests" button after the user is signed in and wallet is connected */}
-              <Link href="/manage-requests">
+                {/* Render "Go to Manage Requests" button after the user is signed in and wallet is connected */}
+                <Link href="/manage-requests">
+                  <button
+                    className={
+                      "m-6 btn btn-md rounded-full btn-neutral shadow-xl text-white " +
+                      open.className
+                    }
+                  >
+                    Go to Manage Requests
+                  </button>
+                </Link>
                 <button
                   className={
-                    "my-6 btn btn-md rounded-full btn-neutral shadow-xl text-white " +
+                    "m-6 btn btn-md rounded-full btn-primary shadow-xl text-white " +
                     open.className
                   }
+                  onClick={handleCopy}
                 >
-                  Go to Manage Requests
+                  Share your profile
                 </button>
-              </Link>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      {toastVisible && (
+        <div className="toast">
+          <div className="alert text-white alert-info">
+            <span>Link copied to clipboard!</span>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
