@@ -151,7 +151,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
           {/* Flexbox to align image and name side by side */}
           <div className="flex items-center justify-center mb-4">
             <img
-              src={userData.photoUrl}
+              src={userData.twitterInfo.profileImageUrl}
               className="w-40 h-40 rounded-lg shadow-2xl mr-4" // Increased size
               alt="User profile"
             />
@@ -164,7 +164,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
 
           {/* Move the description below the image and name */}
           <p className={"text-black text-base mb-4 " + open.className}>
-            {`${userData.name} ${userData.description}. Get to know them better by sending a message!`}
+            {`${userData.name} ${userData.twitterInfo.description}. Get to know them better by sending a message!`}
           </p>
 
           {/* Add message and price section */}
