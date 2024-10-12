@@ -21,6 +21,8 @@ const PendingPage = (): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
   const [telegramUrl, setTelegramUrl] = useState(''); // State to hold the Telegram redirect URL
   const [currentFromId, setCurrentFromId] = useState(''); // Store the fromId for the modal
+  const [userData, setUserData] = useState<any>();
+
 
   const {
     writeContract,
@@ -31,11 +33,12 @@ const PendingPage = (): JSX.Element => {
 
   useEffect(() => {
     const fetchPendingRequests = async () => {
-      if (!loading && user) {
+      if (!loading && user && userData) {
+
         try {
           const requestsRef = collection(db, "requests"); // Reference to the requests collection
-          const q = query(requestsRef, where("toId", "==", user.uid), where("status", "==", "pending")); // Query for pending requests
-          const querySnapshot = await getDocs(q);
+          const q = query(requestsRef, where("toId", "==", userData.twitterUsername), where("status", "==", "pending")); // Query for pending requests
+          const querySnapshot = await getDocs(q)
 
           const requests: Request[] = []; // Array to store the pending requests
           querySnapshot.forEach((doc) => {
@@ -49,10 +52,24 @@ const PendingPage = (): JSX.Element => {
           setFetching(false); // Stop fetching once data is retrieved
         }
       }
+            if (!userData && user) {
+              try {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                  // Store the fetched user data in state
+                  setUserData(userDoc.data());
+                }
+              } catch (error) {
+                console.error("Error fetching sent requests: ", error);
+              } finally {
+                setFetching(false); // Stop fetching once data is retrieved
+              }
+            }
     };
 
     fetchPendingRequests();
-  }, [loading, user]); // Re-run the effect if loading or user changes
+  }, [loading, user, userData]); // Re-run the effect if loading or user changes
 
   const handleAccept = async (requestId: string, fromId: string) => {
     try {

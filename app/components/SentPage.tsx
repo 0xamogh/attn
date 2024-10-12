@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import db from '../../lib/firebase/firestore';
-import { collection, query, where, getDocs } from "firebase/firestore"; // Firestore imports
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore"; // Firestore imports
 import { useAuth } from '../context/authContext';
 import { open, playfair } from "../../lib/font/font";
 
@@ -16,10 +16,12 @@ const SentPage = (): JSX.Element => {
   const { user, loading } = useAuth(); // Get the current user and loading state
   const [sentRequests, setSentRequests] = useState<Request[]>([]); // State to hold an array of requests
   const [fetching, setFetching] = useState(true); // State to indicate if data is being fetched
-
+  const [userData, setUserData] = useState<any>()
   useEffect(() => {
     const fetchSentRequests = async () => {
-      if (!loading && user) {
+
+
+      if (!loading && user && userData) {
         try {
           const requestsRef = collection(db, "requests"); // Correct collection name
           const q = query(requestsRef, where("fromId", "==", user.uid)); // Query requests where fromId is the logged-in user
@@ -37,6 +39,23 @@ const SentPage = (): JSX.Element => {
           setFetching(false); // Stop fetching once data is retrieved
         }
       }
+
+      if(!userData && user){
+        try {
+
+          const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+          // Store the fetched user data in state
+          setUserData(userDoc.data());
+                }
+        } catch (error) {
+          console.error("Error fetching sent requests: ", error);
+        } finally {
+          setFetching(false); // Stop fetching once data is retrieved
+        }
+      }
+      
     };
 
     fetchSentRequests();

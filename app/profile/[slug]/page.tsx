@@ -20,6 +20,7 @@ interface BlogPostProps {
 export default function Profile({ params: { slug } }: BlogPostProps) {
   const { user, loading } = useAuth();
   const [userData, setUserData] = useState<any>(null);
+  const [myUserData, setMyUserData] = useState<any>(null);
 const router = useRouter();
 
   const [message, setMessage] = useState(""); // State to hold the message input
@@ -71,11 +72,34 @@ const router = useRouter();
       }
     };
 
+    const fetchMyUserData = async () => {
+      try {
+        // Fetch the user data, including base price, by matching screenName (or twitterUsername) with slug
+           const userDocRef = doc(db, "users", user!.uid);
+           const userDoc = await getDoc(userDocRef);
+           if (userDoc.exists()) {
+             // Store the fetched user da
+             // Set user data and base price
+             setMyUserData(userDoc.data());
+           } else {
+             console.log("No matching user found!");
+           }
+      } catch (error) {
+        console.log("Error fetching user data: ", error);
+      } finally {
+        setFetching(false);
+      }
+    };
+
     // Call the function to fetch user data if `slug` or `user` changes
     if (slug) {
       fetchUserData();
     }
-  },[slug]);
+
+    if(user){
+      fetchMyUserData()
+    }
+  },[slug, user]);
 
   console.log("price", BigInt(parseEther(String(basePrice! * priceMultiplier*0.01))));
   const handleCreateOrder = () => {
@@ -117,7 +141,7 @@ const router = useRouter();
 
       await setDoc(requestDocRef, {
         // @ts-ignore
-        fromId: user.uid,
+        fromId: myUserData.twitterUsername,
         toId: slug,
         message: message,
         status: "pending",
