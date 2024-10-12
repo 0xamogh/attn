@@ -69,7 +69,7 @@ export default function Home() {
 
       //@ts-ignore
       const twitterUsername = user.reloadUserInfo.screenName;
-s
+
 
       setUserId(user.uid);
       setIsSignedIn(true);
