@@ -77,8 +77,18 @@ const PendingPage = (): JSX.Element => {
       await updateDoc(requestDocRef, { status: "accepted" }); // Update the request status to accepted
 
       // Fetch the telegram ID for the 'fromId' user from Firestore
-      const userDoc = await getDoc(doc(db, "users", fromId));
-      const telegramID = userDoc.data()?.telegramID;
+ const usersRef = collection(db, "users"); // Reference to the requests collection
+ const q = query(usersRef, where("twitterUsername", "==", fromId)); // Query for pending requests
+ const querySnapshot = await getDocs(q);
+
+
+ let userData
+
+      querySnapshot.forEach((doc) => {userData = doc.data()})
+      const telegramID = userData!.telegramID;
+
+      console.log("^_^ ~ file: PendingPage.tsx:82 ~ handleAccept ~ telegramID:", telegramID);
+
 
       if (telegramID) {
         // Set up the Telegram link with a custom message
@@ -140,20 +150,21 @@ const PendingPage = (): JSX.Element => {
               <div>
                 <button
                   className="btn btn-neutral text-white btn-md"
-                  onClick={() =>
-                    writeContract(
-                      {
-                        abi: ATTENTION_ESCROW_ABI,
-                        address: ATTENTION_ESCROW_ADDRESS,
-                        functionName: "completeOrder",
-                        args: [request.id],
-                      },
-                      {
-                        onSuccess: () => handleAccept(request.id, request.fromId),
-                        onError: () => console.log("Failed to accept request"),
-                      }
-                    )
-                  }
+                  // onClick={() =>
+                  //   writeContract(
+                  //     {
+                  //       abi: ATTENTION_ESCROW_ABI,
+                  //       address: ATTENTION_ESCROW_ADDRESS,
+                  //       functionName: "completeOrder",
+                  //       args: [request.id],
+                  //     },
+                  //     {
+                  //       onSuccess: () => handleAccept(request.id, request.fromId),
+                  //       onError: () => console.log("Failed to accept request"),
+                  //     }
+                  //   )
+                  // }
+                  onClick={() => handleAccept(request.id,request.fromId)}
                 >
                   Accept
                 </button>
@@ -187,12 +198,9 @@ const PendingPage = (): JSX.Element => {
             <h3 className={"text-lg font-bold text-black " + open.className}>
               You have accepted the chat request from {currentFromId}.
             </h3>
-            <p className={"py-4 text-black " + open.className}>
-              When you close this box, you will be redirected to their chat on Telegram.
-            </p>
             <div className="modal-action">
-              <button className="btn btn-primary" onClick={closeModalAndRedirect}>
-                Close
+              <button className="btn btn-primary text-white" onClick={closeModalAndRedirect}>
+                Send message on Telegram
               </button>
             </div>
           </div>
