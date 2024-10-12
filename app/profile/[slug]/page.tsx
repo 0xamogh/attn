@@ -90,7 +90,7 @@ const router = useRouter();
       expiryDate.setDate(expiryDate.getDate() + 1); // Adds 1 day to the current date
 
       const expiryTimestamp = Math.floor(expiryDate.getTime() / 1000); // Convert to Unix timestamp in seconds
-      const finalPrice = BigInt(parseEther(String(basePrice * priceMultiplier))); // Calculate final price
+      const finalPrice = BigInt(parseEther(String(basePrice * priceMultiplier * 0.01))); // Calculate final price
 
       console.log(finalPrice);
       
