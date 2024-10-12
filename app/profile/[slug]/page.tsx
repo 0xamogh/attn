@@ -34,21 +34,27 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
   const [isMyPage, setIsMyPage] = useState(true)
 
   useEffect(() => {
-
-  }, [user, slug])
-
-  useEffect(() => {
-    // Fetch the user data, including base price, by matching screenName with slug
     const fetchUserData = async () => {
       try {
+        // Fetch the user data, including base price, by matching screenName (or twitterUsername) with slug
         const q = query(
           collection(db, "users"),
           where("twitterUsername", "==", slug)
         );
         const querySnapshot = await getDocs(q);
+
         if (!querySnapshot.empty) {
-          const userDoc = querySnapshot.docs[0]; // Assuming the screenName is unique and you take the first result
+          const userDoc = querySnapshot.docs[0]; // Assuming screenName is unique
           const userData = userDoc.data();
+
+          // Check if the logged-in user matches the queried user (user.uid)
+          if (user && user.uid === userData.uid) {
+            console.log("Current user matches the queried user.");
+            setIsMyPage(true)
+            // Perform any additional actions if needed
+          }
+
+          // Set user data and base price
           setUserData(userData);
           setBasePrice(userData.price); // Assuming base price is stored under `price`
         } else {
@@ -61,8 +67,11 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
       }
     };
 
-    fetchUserData();
-  }, [loading, user, slug]);
+    // Call the function to fetch user data if `slug` or `user` changes
+    if (slug && user) {
+      fetchUserData();
+    }
+  }, [user, slug]);
 
   const handleCreateOrder = () => {
     if (message.trim() && basePrice !== null) {
@@ -122,6 +131,15 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
     }
   }, [isContractWriteSuccess, isContractWriteError, isContractWritePending]);
 
+    const [toastVisible, setToastVisible] = useState(false);
+
+    const handleCopy = () => {
+      const profileUrl = window.location.origin + "/profile/" + slug; // Your specific URL to be copied
+      navigator.clipboard.writeText(profileUrl).then(() => {
+        setToastVisible(true); // Show the toast
+        setTimeout(() => setToastVisible(false), 3000); // Hide the toast after 3 seconds
+      });
+    };
   if (loading || fetching) {
     return <div>Loading...</div>;
   }
@@ -150,49 +168,70 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
           </p>
 
           {/* Add message and price section */}
-          <p className={"text-black " + open.className}>
-            Wish to talk to {userData.name}? Type a message below and pay{" "}
-            {basePrice ? `${basePrice} wei` : "loading..."} standard rate. Or
-            if you wish to modify your price, use the slider below.
-          </p>
-
-          {basePrice && (
-            <div className="py-4">
-              <input
-                type="range"
-                min="0.8"
-                max="2"
-                step="0.2"
-                value={priceMultiplier}
-                onChange={(e) =>
-                  setPriceMultiplier(parseFloat(e.target.value))
-                }
-                className="range range-primary"
-              />
-              <p>
-                Selected price: {(basePrice * priceMultiplier).toFixed(2)} wei
+          {!isMyPage && (
+            <>
+              <p className={"text-black " + open.className}>
+                Wish to talk to {userData.name}? Type a message below and pay{" "}
+                {basePrice ? `${basePrice} wei` : "loading..."} standard rate.
+                Or if you wish to modify your price, use the slider below.
               </p>
-            </div>
-          )}
 
-          {/* Centered Textarea */}
-          <div className="flex flex-col items-center">
-            <textarea
-              className="textarea textarea-bordered w-full h-32" // Increased size
-              placeholder="Type your message here"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            {/* Centered Button */}
-            <button
-              className="btn btn-primary mt-4"
-              onClick={handleCreateOrder}
-            >
-              Get Started
-            </button>
-          </div>
+              {basePrice && (
+                <div className="py-4">
+                  <input
+                    type="range"
+                    min="0.8"
+                    max="2"
+                    step="0.2"
+                    value={priceMultiplier}
+                    onChange={(e) =>
+                      setPriceMultiplier(parseFloat(e.target.value))
+                    }
+                    className="range range-primary"
+                  />
+                  <p>
+                    Selected price: {(basePrice * priceMultiplier).toFixed(2)}{" "}
+                    wei
+                  </p>
+                </div>
+              )}
+
+              {/* Centered Textarea */}
+              <div className="flex flex-col items-center">
+                <textarea
+                  className="textarea textarea-bordered w-full h-32" // Increased size
+                  placeholder="Type your message here"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+                {/* Centered Button */}
+                <button
+                  className="btn btn-primary mt-4"
+                  onClick={handleCreateOrder}
+                >
+                  Get Started
+                </button>
+              </div>
+            </>
+          )}
+          <button
+            className={
+              "m-6 btn btn-md rounded-full btn-primary shadow-xl text-white " +
+              open.className
+            }
+            onClick={handleCopy}
+          >
+            Share your profile
+          </button>
         </div>
       </div>
+      {toastVisible && (
+        <div className="toast">
+          <div className="alert text-white alert-info">
+            <span>Link copied to clipboard!</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
