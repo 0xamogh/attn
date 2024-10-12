@@ -88,7 +88,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
         address: ATTENTION_ESCROW_ADDRESS,
         functionName: "createOrder",
         args: [orderId, expiryTimestamp, userData.walletAddress], // Pass necessary args for createOrder
-        value: finalPrice, // Pass the selected price in wei
+        value: finalPrice, // Pass the selected price in eth
       });
     } else {
       alert("Message cannot be empty or base price not found");
@@ -164,7 +164,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
 
           {/* Move the description below the image and name */}
           <p className={"text-black text-base mb-4 " + open.className}>
-            {`${userData.name} has been working as a Data professional for the past 3 years. Get to know them better by sending a message!`}
+            {`${userData.name} ${userData.description}. Get to know them better by sending a message!`}
           </p>
 
           {/* Add message and price section */}
@@ -172,7 +172,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
             <>
               <p className={"text-black " + open.className}>
                 Wish to talk to {userData.name}? Type a message below and pay{" "}
-                {basePrice ? `${basePrice} wei` : "loading..."} standard rate.
+                {basePrice ? `${basePrice} eth` : "loading..."} standard rate.
                 Or if you wish to modify your price, use the slider below.
               </p>
 
@@ -191,7 +191,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
                   />
                   <p>
                     Selected price: {(basePrice * priceMultiplier).toFixed(2)}{" "}
-                    wei
+                    eth
                   </p>
                 </div>
               )}
