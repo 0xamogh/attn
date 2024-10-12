@@ -30,7 +30,9 @@ export default function Home() {
   const [toastUpdateProfile, setToastUpdateProfile] =useState(false)
 
   const handleCopy = () => {
+    console.log("^_^ ~ file: page.tsx:34 ~ handleCopy ~ twitterUsername:", twitterUsername);
     const profileUrl = window.location.origin + "/profile/" + twitterUsername; // Your specific URL to be copied
+
     navigator.clipboard.writeText(profileUrl).then(() => {
       setToastVisible(true); // Show the toast
       setTimeout(() => setToastVisible(false), 3000); // Hide the toast after 3 seconds
@@ -67,6 +69,7 @@ export default function Home() {
 
       //@ts-ignore
       const twitterUsername = user.reloadUserInfo.screenName;
+s
 
       setUserId(user.uid);
       setIsSignedIn(true);
@@ -99,6 +102,8 @@ export default function Home() {
         if (userDoc.exists()) {
           // Store the fetched user data in state
           setUserData(userDoc.data());
+          const twitterId = userDoc.data().twitterUsername;
+          setTwitterUsername(twitterId)
         } else {
           console.error("No such document!");
         }
@@ -111,8 +116,10 @@ export default function Home() {
       setIsSignedIn(true); // Update sign-in state
 
       // Fetch the full user document from Firestore
+      console.log("^_^ ~ file: page.tsx:118 ~ useEffect ~ user.uid:", user.uid);
       fetchUserFromDB(user.uid);
     }
+
   }, [account, user]);
 
   // UseEffect to check and print once the account address and userId are available
