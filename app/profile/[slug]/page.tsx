@@ -31,7 +31,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
     isSuccess: isContractWriteSuccess,
   } = useWriteContract();
 
-  const [isMyPage, setIsMyPage] = useState(true)
+  const [isMyPage, setIsMyPage] = useState(false)
 
   useEffect(() => {
     const fetchUserData = async () => {
