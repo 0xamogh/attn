@@ -9,6 +9,7 @@ import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from "@/app/constants/
 import { v4 as uuidv4 } from "uuid"; // UUID import (for generating unique IDs)
 import { Abi } from "viem";
 import { open, playfair } from "../../../lib/font/font";
+import { useRouter } from "next/navigation";
 
 interface BlogPostProps {
   params: {
@@ -19,6 +20,8 @@ interface BlogPostProps {
 export default function Profile({ params: { slug } }: BlogPostProps) {
   const { user, loading } = useAuth();
   const [userData, setUserData] = useState<any>(null);
+const router = useRouter();
+
   const [message, setMessage] = useState(""); // State to hold the message input
   const [fetching, setFetching] = useState(true);
   const [orderId] = useState(uuidv4());
@@ -47,6 +50,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
           const userDoc = querySnapshot.docs[0]; // Assuming screenName is unique
           const userData = userDoc.data();
 
+
           // Check if the logged-in user matches the queried user (user.uid)
           if (user && user.uid === userDoc.id) {
             console.log("Current user matches the queried user.");
@@ -58,22 +62,28 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
           setUserData(userData);
           setBasePrice(userData.price); // Assuming base price is stored under `price`
         } else {
-          console.error("No matching user found!");
+          console.log("No matching user found!");
         }
       } catch (error) {
-        console.error("Error fetching user data: ", error);
+        console.log("Error fetching user data: ", error);
       } finally {
         setFetching(false);
       }
     };
 
     // Call the function to fetch user data if `slug` or `user` changes
-    if (slug && user) {
+    if (slug) {
       fetchUserData();
     }
-  }, [user, slug]);
+  },[slug]);
 
   const handleCreateOrder = () => {
+
+    if(!user){
+      router.push("/")
+      return 
+    }
+
     if (message.trim() && basePrice !== null) {
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 1); // Adds 1 day to the current date
@@ -140,7 +150,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
         setTimeout(() => setToastVisible(false), 3000); // Hide the toast after 3 seconds
       });
     };
-  if (loading || fetching) {
+  if (fetching) {
     return <div>Loading...</div>;
   }
 
@@ -209,7 +219,7 @@ export default function Profile({ params: { slug } }: BlogPostProps) {
                   className="btn text-white btn-primary mt-4"
                   onClick={handleCreateOrder}
                 >
-                  Get Started
+                  {user ? "Pay and Send Message" : "Sign Up"}
                 </button>
               </div>
             </>
