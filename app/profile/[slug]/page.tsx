@@ -7,7 +7,7 @@ import { collection, doc, getDoc, setDoc, addDoc, query, where, getDocs } from "
 import { useReadContract, useWriteContract } from "wagmi";
 import { ATTENTION_ESCROW_ABI, ATTENTION_ESCROW_ADDRESS } from "@/app/constants/constants";
 import { v4 as uuidv4 } from "uuid"; // UUID import (for generating unique IDs)
-import { Abi } from "viem";
+import { Abi, parseEther } from "viem";
 import { open, playfair } from "../../../lib/font/font";
 import { useRouter } from "next/navigation";
 
@@ -77,6 +77,7 @@ const router = useRouter();
     }
   },[slug]);
 
+  console.log("price", BigInt(parseEther(String(basePrice! * priceMultiplier))));
   const handleCreateOrder = () => {
 
     if(!user){
@@ -89,7 +90,7 @@ const router = useRouter();
       expiryDate.setDate(expiryDate.getDate() + 1); // Adds 1 day to the current date
 
       const expiryTimestamp = Math.floor(expiryDate.getTime() / 1000); // Convert to Unix timestamp in seconds
-      const finalPrice = BigInt((basePrice * priceMultiplier).toFixed(0)); // Calculate final price
+      const finalPrice = BigInt(parseEther(String(basePrice * priceMultiplier))); // Calculate final price
 
       console.log(finalPrice);
       
