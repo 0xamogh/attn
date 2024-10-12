@@ -24,7 +24,7 @@ const SentPage = (): JSX.Element => {
       if (!loading && user && userData) {
         try {
           const requestsRef = collection(db, "requests"); // Correct collection name
-          const q = query(requestsRef, where("fromId", "==", user.uid)); // Query requests where fromId is the logged-in user
+          const q = query(requestsRef, where("fromId", "==", userData.twitterUsername)); // Query requests where fromId is the logged-in user
           const querySnapshot = await getDocs(q);
 
           const requests: Request[] = []; // Array to store the requests
@@ -59,7 +59,7 @@ const SentPage = (): JSX.Element => {
     };
 
     fetchSentRequests();
-  }, [loading, user]); // Re-run the effect if loading or user changes
+  }, [loading, user, userData]); // Re-run the effect if loading or user changes
 
   if (loading || fetching) {
     return <div>Loading...</div>; // Show a loading state while data is being fetched
